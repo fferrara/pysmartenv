@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cbdf2c1c-fafb-4fce-a51c-8170ae816121" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pysmartenv/GUI.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pysmartenv/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pysmartenv/commandserver.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pysmartenv/config.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pysmartenv/control.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pysmartenv/panel.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/resources/sala.panel" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pysmartenv/serial.py" />
-    </list>
+    <list default="true" id="cbdf2c1c-fafb-4fce-a51c-8170ae816121" name="Default" comment="" />
     <ignored path="pysmartenv.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path=".idea/dataSources.local.xml" />
