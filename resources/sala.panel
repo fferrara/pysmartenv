@@ -1,0 +1,19 @@
+{
+  "panel": {
+      "id" : 1,
+      "items" : [
+          { "name" : "ventilador",
+             "img" : "vent.jpg"
+             },
+          { "name" : "televisao",
+             "img" : "tv.jpg"
+             },
+          { "name" : "lampada",
+             "img" : "lamp.jpg"
+             },
+          { "name" : "movimento",
+             "img" : "mov.png"
+             }
+        ]
+  }
+}
