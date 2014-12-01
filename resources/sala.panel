@@ -3,16 +3,20 @@
       "id" : 1,
       "items" : [
           { "name" : "ventilador",
-             "img" : "vent.jpg"
+             "img" : "../resources/vent.jpg",
+             "message" : "vnt"
              },
           { "name" : "televisao",
-             "img" : "tv.jpg"
+             "img" : "../resources/tv.jpg",
+             "message" : "tlv"
              },
           { "name" : "lampada",
-             "img" : "lamp.jpg"
+             "img" : "../resources/lamp.jpg",
+             "message" : "lmp"
              },
           { "name" : "movimento",
-             "img" : "mov.png"
+             "img" : "../resources/mov.png",
+             "message" : "mvm"
              }
         ]
   }
