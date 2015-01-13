@@ -6,17 +6,21 @@ Draws a Panel according with its descriptor file, which contains option names, i
 """
 
 import Tkinter as tk
+import tkFont
 import Image as img
 import ImageTk as imgtk
+import os
 import panel
+import config
 
 
 class GUI(tk.Tk):
     WIDTH = 800
     HEIGHT = 600
 
-    def __init__(self, master=None):
+    def __init__(self, queues, master=None):
         tk.Tk.__init__(self)
+
         self.resizable(width=False, height=False)  # Make window not resizable
         self.minsize(width=self.WIDTH, height=self.HEIGHT)  # Window size
         # Window at center of screen
@@ -26,8 +30,22 @@ class GUI(tk.Tk):
         y = h / 2 - self.HEIGHT / 2
         self.geometry("%dx%d+%d+%d" % ((self.WIDTH, self.HEIGHT) + (x, y)))
 
-        self.title('Prova')  # Window title
+        # here the messages from Control will arrive
+        # onOffQueue will contain string messages with 'on' and 'off'
+        # panelQueue will contain panel that will be drawn
+        self.onOffQueue, self.panelQueue = queues
+
+        self.currentImg = None
+        self.littleimg = None
+        self.optionLabels = None
+        self.currentImgLabel = None
+
+        self.title('Assistive Smart Environment')  # Window title
+        self.topFont = tkFont.Font(family='Helvetica', size=25, weight='bold')
+        self.bottomFont = tkFont.Font(family='Helvetica', size=12, weight='bold')
+        self.maxOptions = config.OPTIONS_NUM
         self._draw()
+        self.after(500, self.check_queues)
 
     def _draw(self):
         # grid (table) geometry
@@ -41,68 +59,112 @@ class GUI(tk.Tk):
         self.bottomFrame = tk.Frame(self, height=160, width=760)  # create frame
         self.bottomFrame.grid_propagate(False)  # size fixed
         self.bottomFrame.grid(row=1, column=0, padx=20, pady=20)  # show at bottom
-        # each column take the same space
+
+        # need a reference to the current panel id
+        # when the panel change, we notice this difference and call show_panel
+        self.panelId = 0
+
+        # each column take the same space, excepting arrows
         self.bottomFrame.columnconfigure(0, weight=1)
-        self.bottomFrame.columnconfigure(1, weight=1)
-        self.bottomFrame.columnconfigure(2, weight=1)
-        self.bottomFrame.columnconfigure(3, weight=1)
+        for i in range(self.maxOptions):
+            self.bottomFrame.columnconfigure(i+1, weight=2)
+        self.bottomFrame.columnconfigure(self.maxOptions+1, weight=1)
+
+    def check_queues(self):
+        if not self.onOffQueue.empty():
+            # an on/off command arrived
+            cmd = self.onOffQueue.get_nowait()
+            if cmd == 'on':
+                self.deiconify()
+            elif cmd == 'off':
+                self.withdraw()
+        if not self.panelQueue.empty():
+            # a new panel needs to be drawn
+            self.show_panel(self.panelQueue.get_nowait())
+        # if not self.optionQueue.empty():
+        #     # a new option has been selected
+        #     self.show_option(self.optionQueue.get_nowait())
+
+        self.after(100, self.check_queues)
+
 
     def show_panel(self, panel):
+        self.currentPanel = panel
+
+        # first deleting old labels and images
+        for w in self.bottomFrame.winfo_children():
+            w.grid_forget()
+        for w in self.upFrame.winfo_children():
+            w.grid_forget()
+
         # fill bottom frame
-        self.littleimg = [None] * len(panel.options)
+        self.arrowimg = [None] * 2
+        self.littleimg = [None] * len(panel.options) # need to store images references
         self.optionLabels = [None] * len(panel.options)
-        for i in range(len(panel.options)):
+        self.optionLeds = [None] * len(panel.options)
+
+        # left arrow
+        imgFile = os.path.join(config.RESOURCES_PATH, 'arrow-left.png')
+        icon = img.open(imgFile).resize((50, 50), img.ANTIALIAS)
+        self.arrowimg[0] = imgtk.PhotoImage(icon)
+        tk.Label(self.bottomFrame, image=self.arrowimg[0]).grid(row=1, column=0)
+
+        for i, option in enumerate(panel.options):
             # create and visualize option label
-            self.optionLabels[i] = tk.Label(self.bottomFrame, text=panel.options[i].name)
-            self.optionLabels[i].grid(column=i, row=0)
+            lbl = tk.Label(self.bottomFrame, text=option.name, font=self.bottomFont)
+            if lbl['text'] == panel.currentOption.name:
+                lbl.configure(bd=10)
+            else:
+                lbl.configure(bd=2)
+            self.optionLabels[i] = lbl
+            self.optionLabels[i].grid(column=i+1, row=0)
             # create and visualize option icon
-            icon = img.open(panel.options[i].imgFile).resize((100, 100), img.ANTIALIAS)
+            if option.isOn and hasattr(panel.options[i], 'imgOn'):
+                imgFile = os.path.join(config.RESOURCES_PATH, panel.options[i].imgOn)
+            else:
+                imgFile = os.path.join(config.RESOURCES_PATH, panel.options[i].imgOff)
+            icon = img.open(imgFile).resize((100, 100), img.ANTIALIAS)
             self.littleimg[i] = imgtk.PhotoImage(icon)
-            tk.Label(self.bottomFrame, image=self.littleimg[i]).grid(row=1, column=i, sticky=tk.S)
+            tk.Label(self.bottomFrame, image=self.littleimg[i]).grid(row=1, column=i+1, sticky=tk.S)
+            # create option leds
+            self.optionLeds[i] = tk.Label(self.bottomFrame, background='#f00')
+            self.optionLeds[i].grid(column=i+1, row=2, sticky=tk.E+tk.W, padx=10)
+            self.optionLeds[i].grid_remove()
 
-        # call update_GUI to fill the top frame, showing currently selected option
-        self.update_GUI(panel)
+        # right arrow
+        imgFile = os.path.join(config.RESOURCES_PATH, 'arrow-right.png')
+        icon = img.open(imgFile).resize((50, 50), img.ANTIALIAS)
+        self.arrowimg[1] = imgtk.PhotoImage(icon)
+        tk.Label(self.bottomFrame, image=self.arrowimg[1]).grid(row=1, column=self.maxOptions+1)
 
-
-    def update_GUI(self, panel):
-        currentOption = panel.currentOption
         # fill top frame
-        tk.Label(self.upFrame, text=currentOption.name).grid(row=0, column=0)
-        I = img.open(currentOption.imgFile).resize((300, 300), img.ANTIALIAS)
+        # create new label
+        tk.Label(self.upFrame, text=panel.currentOption.name, font=self.topFont).grid(row=0, column=0)
+        # create new image
+        imgFile = os.path.join(config.RESOURCES_PATH, panel.currentOption.imgOff)
+        I = img.open(imgFile).resize((300, 300), img.ANTIALIAS)
         self.currentImg = imgtk.PhotoImage(I)
         self.currentImgLabel = tk.Label(self.upFrame, image=self.currentImg)
         self.currentImgLabel.grid(row=1, column=0, sticky=tk.S)
-
-        for label in self.optionLabels:
-            if label['text'] == currentOption.name:
-                label.configure(bd = 10)
-                label.configure(relief = 'ridge')
-                label.configure(fg = '#f00')
-            else:
-                label.configure(bd = 2)
-                label.configure(relief = 'flat')
-                label.configure(fg = '#000')
-
-        self.after(500, self.update_GUI, panel)
 
 # Test class
 if __name__ == '__main__':
     from threading import Thread
     from time import sleep
 
-    def threaded_function(arg):
+    def simulate_control(arg):
         sleep(2)
-        arg.currentOption = arg.options[1]
+        arg.next_option()
         sleep(2)
-        arg.currentOption = arg.options[2]
+        arg.next_option()
         sleep(2)
-        arg.currentOption = arg.options[3]
+        arg.switch()
 
-    app = GUI()
+    app = GUI(None)
     jsonFile = '../resources/sala.panel'
-    panel = panel.Panel(jsonFile)
+    panel = panel.Panel(jsonFile, 1)
 
-    thread = Thread(target = threaded_function, args = (panel, ))
+    thread = Thread(target=simulate_control, args=(panel, ))
     thread.start()
 
     app.show_panel(panel)

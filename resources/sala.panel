@@ -1,23 +1,86 @@
 {
-  "panel": {
+  "panels": [{
       "id" : 1,
       "items" : [
-          { "name" : "ventilador",
-             "img" : "../resources/vent.jpg",
+          { "id" : 10,
+            "name" : "Ventilador",
+             "imgOff" : "ventilador.jpg",
+             "imgOn" : "ventilador - amarelo.jpg",
+             "deviceOperation": "switch",
              "message" : "vnt"
              },
-          { "name" : "televisao",
-             "img" : "../resources/tv.jpg",
-             "message" : "tlv"
+          { "id" : 11,
+            "name" : "Televisão",
+             "imgOff" : "tv.jpg",
+             "imgOn" : "tv - amarelo.jpg",
+             "deviceOperation": "device_on",
+             "message" : "tlv",
+             "panelId" : 2
              },
-          { "name" : "lampada",
-             "img" : "../resources/lamp.jpg",
+          { "id" : 12,
+            "name" : "Lâmpada",
+             "imgOff" : "luz.jpg",
+             "imgOn" : "luz - amarelo.jpg",
+             "deviceOperation": "switch",
              "message" : "lmp"
              },
-          { "name" : "movimento",
-             "img" : "../resources/mov.png",
-             "message" : "mvm"
+          { "id" : 13,
+            "name" : "Rádio",
+             "imgOff" : "radio.jpg",
+             "imgOn" : "radio - amarelo.jpg",
+             "deviceOperation": "switch",
+             "message" : "rdo"
+             },
+          { "id" : 14,
+            "name" : "Fechar",
+             "imgOff" : "stop.jpg",
+             "turnOff" : 1
              }
         ]
-  }
+  },{
+    "id" : 2,
+      "items" : [
+          { "id" : 20,
+            "name" : "Desligar",
+             "imgOff" : "power.jpg",
+             "deviceOperation": "device_off",
+             "objectId" : 11,
+             "message" : "tlv",
+             "panelId" : 1
+             },
+          { "id" : 21,
+            "name" : "Canal +",
+             "imgOff" : "canal mais.jpg",
+             "imgOn" :  "canal mais - amarelo.jpg",
+             "deviceOperation": "device_modify",
+             "message" : "chu"
+             },
+          { "id" : 22,
+            "name" : "Canal -",
+             "imgOff" : "canal menos.jpg",
+             "imgOn" :  "canal menos - amarelo.jpg",
+             "deviceOperation": "device_modify",
+             "message" : "chd"
+             },
+          { "id" : 23,
+            "name" : "Volume +",
+             "imgOff" : "volume mais.jpg",
+             "imgOn" :  "volume mais - amarelo.jpg",
+             "deviceOperation": "device_modify",
+             "message" : "vlu"
+             },
+          { "id" : 24,
+            "name" : "Volume -",
+             "imgOff" : "volume menos.jpg",
+             "imgOn" :  "volume menos - amarelo.jpg",
+             "deviceOperation": "device_modify",
+             "message" : "vlu"
+             },
+          { "id" : 25,
+            "name" : "Voltar",
+             "imgOff" : "stop.jpg",
+             "panelId" : 1
+             }
+        ]
+  }]
 }
