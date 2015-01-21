@@ -26,7 +26,7 @@ class CommandServer(server.Server):
             # execute function
             # 'getattr(object, function)' returns a function which is called
             f = getattr(self.control, function)
-            f()
+            return f()
         except KeyError as ke:  # command not present
             raise Exception('Command %s not implemented' % str(command))
         except Exception as e:  # generic error

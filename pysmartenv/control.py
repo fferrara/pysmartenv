@@ -42,7 +42,8 @@ class Control(object):
         queues = (self.onOffQueue, self.panelQueue)
 
         # create GUI
-        self.gui = GUI.GUI(queues)
+        self.synchGUI = threading.Event()
+        self.gui = GUI.GUI(queues, self.synchGUI)
 
         self.state = 'off'
 
@@ -73,7 +74,7 @@ class Control(object):
             # update the panel, show ON icon only for 1 second
             pnl.switch()
             self.panelQueue.put_nowait(pnl)
-            time.sleep(1)
+            time.sleep(1)  # wait a moment with the icon highlighted
             pnl.switch()
             self.panelQueue.put_nowait(pnl)
             # the GUI main loop will update the window automatically
@@ -89,12 +90,16 @@ class Control(object):
         # create gui and enter in its main loop
         p = self.panels[self.currentPanelId]
         self.panelQueue.put(p)
+        self.synchGUI.set()
         self.gui.mainloop()
 
     def turn_on(self):
         if self.state == 'off':
             self.onOffQueue.put_nowait('on')
             self.state = 'on'
+            self.synchGUI.clear()
+            time.sleep(2)  # wait a moment for the user to rest
+            self.synchGUI.set()
 
     def do_ok(self):
         if self.state != 'off':
@@ -103,9 +108,10 @@ class Control(object):
             if hasattr(option, 'turnOff'):
                 self.onOffQueue.put_nowait('off')
                 self.state = 'off'
-                # p.next_option() # if not, Quit will continue to be selected
+                return 'OFF'
 
             if hasattr(option, 'deviceOperation') and not hasattr(option, 'objectId'):
+                # operate a device and wait
                 self._operate_device(self.panels[self.currentPanelId], option, option.deviceOperation)
 
             if hasattr(option, 'deviceOperation') and hasattr(option, 'objectId'):
@@ -131,15 +137,28 @@ class Control(object):
                 self.panelQueue.put_nowait(p)
                 # the GUI main loop will update the window automatically
 
+            # wait a moment for the user to rest
+            self.synchGUI.clear()
+            time.sleep(2)  # wait
+            self.synchGUI.set()
+
     def do_next(self):
         p = self.panels[self.currentPanelId]
         p.next_option()
         self.panelQueue.put_nowait(p)
+        # wait a moment for the user to rest
+        self.synchGUI.clear()
+        time.sleep(2)
+        self.synchGUI.set()
 
     def do_previous(self):
         p = self.panels[self.currentPanelId]
         p.prev_option()
         self.panelQueue.put_nowait(p)
+        # wait a moment for the user to rest
+        self.synchGUI.clear()
+        time.sleep(2)
+        self.synchGUI.set()
 
 
 if __name__ == '__main__':

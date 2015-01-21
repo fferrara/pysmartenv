@@ -11,6 +11,7 @@ import Image as img
 import ImageTk as imgtk
 import os
 import panel
+import time
 import config
 
 
@@ -18,8 +19,9 @@ class GUI(tk.Tk):
     WIDTH = 800
     HEIGHT = 600
 
-    def __init__(self, queues, master=None):
+    def __init__(self, queues, evtSynch, master=None):
         tk.Tk.__init__(self)
+        self.synch = evtSynch
 
         self.resizable(width=False, height=False)  # Make window not resizable
         self.minsize(width=self.WIDTH, height=self.HEIGHT)  # Window size
@@ -34,11 +36,6 @@ class GUI(tk.Tk):
         # onOffQueue will contain string messages with 'on' and 'off'
         # panelQueue will contain panel that will be drawn
         self.onOffQueue, self.panelQueue = queues
-
-        self.currentImg = None
-        self.littleimg = None
-        self.optionLabels = None
-        self.currentImgLabel = None
 
         self.title('Assistive Smart Environment')  # Window title
         self.topFont = tkFont.Font(family='Helvetica', size=25, weight='bold')
@@ -87,7 +84,6 @@ class GUI(tk.Tk):
 
         self.after(100, self.check_queues)
 
-
     def show_panel(self, panel):
         self.currentPanel = panel
 
@@ -98,16 +94,15 @@ class GUI(tk.Tk):
             w.grid_forget()
 
         # fill bottom frame
-        self.arrowimg = [None] * 2
-        self.littleimg = [None] * len(panel.options) # need to store images references
-        self.optionLabels = [None] * len(panel.options)
-        self.optionLeds = [None] * len(panel.options)
+        self.bottomFrame.arrowimg = [None] * 2
+        self.bottomFrame.littleimg = [None] * len(panel.options)  # need to store images references
+        self.bottomFrame.optionLabels = [None] * len(panel.options)
 
         # left arrow
         imgFile = os.path.join(config.RESOURCES_PATH, 'arrow-left.png')
         icon = img.open(imgFile).resize((50, 50), img.ANTIALIAS)
-        self.arrowimg[0] = imgtk.PhotoImage(icon)
-        tk.Label(self.bottomFrame, image=self.arrowimg[0]).grid(row=1, column=0)
+        self.bottomFrame.arrowimg[0] = imgtk.PhotoImage(icon)
+        tk.Label(self.bottomFrame, image=self.bottomFrame.arrowimg[0]).grid(row=1, column=0)
 
         for i, option in enumerate(panel.options):
             # create and visualize option label
@@ -116,36 +111,45 @@ class GUI(tk.Tk):
                 lbl.configure(bd=10)
             else:
                 lbl.configure(bd=2)
-            self.optionLabels[i] = lbl
-            self.optionLabels[i].grid(column=i+1, row=0)
+            self.bottomFrame.optionLabels[i] = lbl
+            self.bottomFrame.optionLabels[i].grid(column=i+1, row=0)
             # create and visualize option icon
             if option.isOn and hasattr(panel.options[i], 'imgOn'):
                 imgFile = os.path.join(config.RESOURCES_PATH, panel.options[i].imgOn)
             else:
                 imgFile = os.path.join(config.RESOURCES_PATH, panel.options[i].imgOff)
             icon = img.open(imgFile).resize((100, 100), img.ANTIALIAS)
-            self.littleimg[i] = imgtk.PhotoImage(icon)
-            tk.Label(self.bottomFrame, image=self.littleimg[i]).grid(row=1, column=i+1, sticky=tk.S)
-            # create option leds
-            self.optionLeds[i] = tk.Label(self.bottomFrame, background='#f00')
-            self.optionLeds[i].grid(column=i+1, row=2, sticky=tk.E+tk.W, padx=10)
-            self.optionLeds[i].grid_remove()
+            self.bottomFrame.littleimg[i] = imgtk.PhotoImage(icon)
+            tk.Label(self.bottomFrame, image=self.bottomFrame.littleimg[i]).grid(row=1, column=i+1, sticky=tk.S)
 
         # right arrow
         imgFile = os.path.join(config.RESOURCES_PATH, 'arrow-right.png')
         icon = img.open(imgFile).resize((50, 50), img.ANTIALIAS)
-        self.arrowimg[1] = imgtk.PhotoImage(icon)
-        tk.Label(self.bottomFrame, image=self.arrowimg[1]).grid(row=1, column=self.maxOptions+1)
+        self.bottomFrame.arrowimg[1] = imgtk.PhotoImage(icon)
+        tk.Label(self.bottomFrame, image=self.bottomFrame.arrowimg[1]).grid(row=1, column=self.maxOptions+1)
 
         # fill top frame
         # create new label
-        tk.Label(self.upFrame, text=panel.currentOption.name, font=self.topFont).grid(row=0, column=0)
+        self.upFrame.l = tk.Label(self.upFrame, text=panel.currentOption.name, font=self.topFont)
+        self.upFrame.l.grid(row=0, column=0)
+        # create ampulheta
+        imgFile = os.path.join(config.RESOURCES_PATH, "wait.png")
+        I = img.open(imgFile).resize((70, 70), img.ANTIALIAS)
+        self.upFrame.a = imgtk.PhotoImage(I)
+        self.upFrame.aLabel = tk.Label(self.upFrame, image=self.upFrame.a)
+        self.upFrame.aLabel.grid(row=0, column=0, sticky=tk.E)
         # create new image
         imgFile = os.path.join(config.RESOURCES_PATH, panel.currentOption.imgOff)
         I = img.open(imgFile).resize((300, 300), img.ANTIALIAS)
-        self.currentImg = imgtk.PhotoImage(I)
-        self.currentImgLabel = tk.Label(self.upFrame, image=self.currentImg)
-        self.currentImgLabel.grid(row=1, column=0, sticky=tk.S)
+        self.upFrame.currentImg = imgtk.PhotoImage(I)
+        self.upFrame.currentImgLabel = tk.Label(self.upFrame, image=self.upFrame.currentImg)
+        self.upFrame.currentImgLabel.grid(row=1, column=0, sticky=tk.S)
+
+        self.update()
+        # sleep a moment for the user to rest
+        # and then wait for the command
+        self.synch.wait()
+        self.upFrame.aLabel.grid_forget()
 
 # Test class
 if __name__ == '__main__':
