@@ -1,6 +1,25 @@
 pysmartenv
 ==========
 
+This project provides a Control Interface (CI) module for an assistive domotics system called SMAD.
+The CI is responsible of receiving commands by an RPC server and communicating with the Arduino plate, which will operate the desired device.
+Also, CI module offers a GUI for the end-user.
+
+The SMAD project is a research project from Universidade Federal do Espirito Santo (UFES), presented in:
++ [Flavio Ferrara's M.Sc. thesis]()
++ [Video](https://vimeo.com/122515785)
++ ...more coming
+
+This CI needs to be coupled to a Biological Signal Transducer (BST) in order to the entire system to be employed. Two examples of BSTs are provided in this twin [project](https://github.com/ienaplissken/pyassistive).
+
+Dependencies
+------------
++ Python 2.7 (complete installation with Tk library)
++ pyserial (Arduino communication)
++ [jsonrcptcp](https://github.com/joshmarshall/jsonrpctcp/tree/master/jsonrpctcp), a JSON-RPC library (Apache 2.0 license)
+
+Menu panel
+-----------
 Template of a JSON Panel descriptor file.
 
 ```json
