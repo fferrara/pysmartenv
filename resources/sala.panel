@@ -44,9 +44,9 @@
             "name" : "Desligar",
              "imgOff" : "power.jpg",
              "deviceOperation": "device_off",
-             "objectId" : 11,
              "message" : "tlv",
-             "panelId" : 1
+             "panelId" : 1,
+             "objectId" : 11
              },
           { "id" : 21,
             "name" : "Canal +",
